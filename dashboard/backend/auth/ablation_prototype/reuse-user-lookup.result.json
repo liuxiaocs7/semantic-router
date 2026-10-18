@@ -1,0 +1,7 @@
+{
+  "variant": "reuse-user-lookup",
+  "exit_code": 0,
+  "production_line_delta": -6,
+  "failed_cases": [],
+  "passed_cases": 96
+}

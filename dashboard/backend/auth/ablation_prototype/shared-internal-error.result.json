@@ -1,0 +1,7 @@
+{
+  "variant": "shared-internal-error",
+  "exit_code": 0,
+  "production_line_delta": -7,
+  "failed_cases": [],
+  "passed_cases": 96
+}

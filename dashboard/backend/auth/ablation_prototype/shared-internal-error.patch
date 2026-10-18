@@ -1,0 +1,143 @@
+diff --git a/dashboard/backend/auth/admin_meta_handlers.go b/dashboard/backend/auth/admin_meta_handlers.go
+index bf7093ed3..2a3ebea2c 100644
+--- a/dashboard/backend/auth/admin_meta_handlers.go
++++ b/dashboard/backend/auth/admin_meta_handlers.go
+@@ -22,8 +22,7 @@ func adminPermissionsHandler(svc *Service) http.HandlerFunc {
+ 
+ 		perms, err := svc.store.ListRolePermissions(r.Context())
+ 		if err != nil {
+-			log.Printf("failed to list permissions: %v", err)
+-			http.Error(w, "failed to list permissions", http.StatusInternalServerError)
++			writeInternalError(w, "failed to list permissions", err)
+ 			return
+ 		}
+ 
+@@ -59,8 +58,7 @@ func adminAuditLogsHandler(svc *Service) http.HandlerFunc {
+ 				http.Error(w, err.Error(), http.StatusBadRequest)
+ 				return
+ 			}
+-			log.Printf("failed to query audit logs: %v", err)
+-			http.Error(w, "failed to query audit logs", http.StatusInternalServerError)
++			writeInternalError(w, "failed to query audit logs", err)
+ 			return
+ 		}
+ 
+@@ -124,8 +122,7 @@ func adminUserPasswordHandler(svc *Service) http.HandlerFunc {
+ 			if writeAdminMutationAuthorizationError(w, err) {
+ 				return
+ 			}
+-			log.Printf("failed to update password: %v", err)
+-			http.Error(w, "failed to update password", http.StatusInternalServerError)
++			writeInternalError(w, "failed to update password", err)
+ 			return
+ 		}
+ 
+diff --git a/dashboard/backend/auth/admin_user_handlers.go b/dashboard/backend/auth/admin_user_handlers.go
+index 926d75b0d..1544b2fad 100644
+--- a/dashboard/backend/auth/admin_user_handlers.go
++++ b/dashboard/backend/auth/admin_user_handlers.go
+@@ -49,8 +49,7 @@ func handleAdminUsersList(w http.ResponseWriter, r *http.Request, svc *Service)
+ 	}
+ 	users, err := svc.store.ListUsers(r.Context(), options)
+ 	if err != nil {
+-		log.Printf("failed to list users: %v", err)
+-		http.Error(w, "failed to list users", http.StatusInternalServerError)
++		writeInternalError(w, "failed to list users", err)
+ 		return
+ 	}
+ 	total, err := svc.store.CountFilteredUsers(r.Context(), options)
+@@ -188,8 +187,7 @@ func handleAdminUserPatch(
+ 		if writeAdminMutationAuthorizationError(w, err) {
+ 			return
+ 		}
+-		log.Printf("failed to update user: %v", err)
+-		http.Error(w, "failed to update user", http.StatusInternalServerError)
++		writeInternalError(w, "failed to update user", err)
+ 		return
+ 	}
+ 
+@@ -242,8 +240,7 @@ func handleAdminUserDelete(
+ 		if writeAdminMutationAuthorizationError(w, err) {
+ 			return
+ 		}
+-		log.Printf("failed to delete user: %v", err)
+-		http.Error(w, "failed to delete user", http.StatusInternalServerError)
++		writeInternalError(w, "failed to delete user", err)
+ 		return
+ 	}
+ 
+@@ -319,6 +316,5 @@ func writeUserLookupError(w http.ResponseWriter, err error) {
+ 		http.Error(w, "user not found", http.StatusNotFound)
+ 		return
+ 	}
+-	log.Printf("failed to load user: %v", err)
+-	http.Error(w, "failed to load user", http.StatusInternalServerError)
++	writeInternalError(w, "failed to load user", err)
+ }
+diff --git a/dashboard/backend/auth/invitation_handlers.go b/dashboard/backend/auth/invitation_handlers.go
+index fe2ec3010..c8453a966 100644
+--- a/dashboard/backend/auth/invitation_handlers.go
++++ b/dashboard/backend/auth/invitation_handlers.go
+@@ -34,8 +34,7 @@ func adminInvitationsHandler(svc *Service) http.HandlerFunc {
+ 		case http.MethodGet:
+ 			items, err := svc.store.ListInvitations(r.Context())
+ 			if err != nil {
+-				log.Printf("failed to list invitations: %v", err)
+-				http.Error(w, "failed to list invitations", http.StatusInternalServerError)
++				writeInternalError(w, "failed to list invitations", err)
+ 				return
+ 			}
+ 			respondJSON(w, map[string]any{"invitations": items})
+@@ -64,8 +63,7 @@ func adminInvitationsHandler(svc *Service) http.HandlerFunc {
+ 				if writeInvitationValidationError(w, err) {
+ 					return
+ 				}
+-				log.Printf("failed to create invitation: %v", err)
+-				http.Error(w, "failed to create invitation", http.StatusInternalServerError)
++				writeInternalError(w, "failed to create invitation", err)
+ 				return
+ 			}
+ 			writeAudit(r, svc, "invitation.create", "dashboard-invitations", ac.UserID)
+@@ -184,8 +182,7 @@ func writeInvitationError(w http.ResponseWriter, err error) {
+ 	if writeInvitationValidationError(w, err) {
+ 		return
+ 	}
+-	log.Printf("failed to process invitation: %v", err)
+-	http.Error(w, "failed to process invitation", http.StatusInternalServerError)
++	writeInternalError(w, "failed to process invitation", err)
+ }
+ 
+ func writeInvitationValidationError(w http.ResponseWriter, err error) bool {
+diff --git a/dashboard/backend/auth/public_handlers.go b/dashboard/backend/auth/public_handlers.go
+index 9bf1e12e1..7b82d9a1b 100644
+--- a/dashboard/backend/auth/public_handlers.go
++++ b/dashboard/backend/auth/public_handlers.go
+@@ -25,8 +25,7 @@ func bootstrapCanRegisterHandler(svc *Service) http.HandlerFunc {
+ 
+ 		canRegister, err := svc.CanBootstrap(r.Context())
+ 		if err != nil {
+-			log.Printf("failed to check bootstrap status: %v", err)
+-			http.Error(w, "failed to check bootstrap status", http.StatusInternalServerError)
++			writeInternalError(w, "failed to check bootstrap status", err)
+ 			return
+ 		}
+ 
+@@ -70,8 +69,7 @@ func bootstrapRegisterHandler(svc *Service) http.HandlerFunc {
+ 		// correctness gate for concurrent requests.
+ 		canBootstrap, err := svc.CanBootstrap(r.Context())
+ 		if err != nil {
+-			log.Printf("failed to check bootstrap status: %v", err)
+-			http.Error(w, "failed to check bootstrap status", http.StatusInternalServerError)
++			writeInternalError(w, "failed to check bootstrap status", err)
+ 			return
+ 		}
+ 		if !canBootstrap {
+@@ -179,3 +177,8 @@ func meHandler(svc *Service) http.HandlerFunc {
+ 		respondJSON(w, map[string]any{"user": cloneSessionUser(user, ac.Perms)})
+ 	}
+ }
++
++func writeInternalError(w http.ResponseWriter, message string, err error) {
++	log.Printf("%s: %v", message, err)
++	http.Error(w, message, http.StatusInternalServerError)
++}

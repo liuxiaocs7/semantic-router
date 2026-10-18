@@ -1,0 +1,27 @@
+diff --git a/dashboard/backend/auth/invitation_service.go b/dashboard/backend/auth/invitation_service.go
+index 84394df62..7a3a675bc 100644
+--- a/dashboard/backend/auth/invitation_service.go
++++ b/dashboard/backend/auth/invitation_service.go
+@@ -4,7 +4,6 @@ import (
+ 	"context"
+ 	"crypto/rand"
+ 	"crypto/sha256"
+-	"database/sql"
+ 	"encoding/base64"
+ 	"encoding/hex"
+ 	"errors"
+@@ -116,13 +115,7 @@ func (s *Service) RotateInvitation(ctx context.Context, id string, actors ...Aut
+ 
+ func (s *Service) InvitationInfo(ctx context.Context, token string) (*Invitation, error) {
+ 	item, _, err := s.store.GetInvitationByDigest(ctx, invitationTokenDigest(token))
+-	if errors.Is(err, sql.ErrNoRows) {
+-		return nil, ErrInvitationUnavailable
+-	}
+-	if err != nil {
+-		return nil, err
+-	}
+-	if item.Status != InvitationPending || item.ExpiresAt <= nowUnix() {
++	if err != nil || item.Status != InvitationPending || item.ExpiresAt <= nowUnix() {
+ 		return nil, ErrInvitationUnavailable
+ 	}
+ 	return item, nil

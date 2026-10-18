@@ -1,0 +1,34 @@
+diff --git a/dashboard/backend/auth/admin_user_handlers.go b/dashboard/backend/auth/admin_user_handlers.go
+index 926d75b0d..d5062f1d2 100644
+--- a/dashboard/backend/auth/admin_user_handlers.go
++++ b/dashboard/backend/auth/admin_user_handlers.go
+@@ -171,12 +171,8 @@ func handleAdminUserPatch(
+ 		normalizedRole,
+ 		normalizedStatus,
+ 	); validationErr != nil {
+-		if errors.Is(validationErr, errLastActiveUserManager) {
+-			http.Error(w, errLastActiveUserManager.Error(), http.StatusConflict)
+-		} else {
+-			log.Printf("failed to validate user update: %v", validationErr)
+-			http.Error(w, "failed to update user", http.StatusInternalServerError)
+-		}
++		log.Printf("failed to validate user update: %v", validationErr)
++		http.Error(w, "failed to update user", http.StatusInternalServerError)
+ 		return
+ 	}
+ 
+@@ -226,12 +222,8 @@ func handleAdminUserDelete(
+ 		target.Role,
+ 		"inactive",
+ 	); err != nil {
+-		if errors.Is(err, errLastActiveUserManager) {
+-			http.Error(w, errLastActiveUserManager.Error(), http.StatusConflict)
+-		} else {
+-			log.Printf("failed to validate user deletion: %v", err)
+-			http.Error(w, "failed to delete user", http.StatusInternalServerError)
+-		}
++		log.Printf("failed to validate user deletion: %v", err)
++		http.Error(w, "failed to delete user", http.StatusInternalServerError)
+ 		return
+ 	}
+ 

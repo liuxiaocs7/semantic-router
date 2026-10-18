@@ -1,0 +1,19 @@
+{
+  "variant": "invitation-no-validation",
+  "exit_code": 1,
+  "production_line_delta": -9,
+  "failed_cases": [
+    "TestInvitationValidationErrorsKeepSafeMessages/enter_a_valid_email_address",
+    "TestInvitationValidationErrorsKeepSafeMessages/name_is_required",
+    "TestInvitationValidationErrorsKeepSafeMessages/a_dashboard_user_with_this_email_already_exists",
+    "TestInvitationValidationErrorsKeepSafeMessages/invitation_kind_must_be_personal_or_shared",
+    "TestInvitationValidationErrorsKeepSafeMessages/shared_invitation_capacity_must_be_between_2_and_100",
+    "TestInvitationValidationErrorsKeepSafeMessages/role_must_be_one_of_admin,_write,_read",
+    "TestAdminInvitationCreationKeepsValidationResponses/invitation_kind_must_be_personal_or_shared",
+    "TestAdminInvitationCreationKeepsValidationResponses/role_must_be_one_of_admin,_write,_read",
+    "TestAdminInvitationCreationKeepsValidationResponses/shared_invitation_capacity_must_be_between_2_and_100",
+    "TestAdminInvitationCreationKeepsValidationResponses/enter_a_valid_email_address",
+    "TestAdminInvitationCreationKeepsValidationResponses/name_is_required"
+  ],
+  "passed_cases": 83
+}

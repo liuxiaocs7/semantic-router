@@ -1,0 +1,312 @@
+diff --git a/dashboard/backend/auth/admin_meta_handlers.go b/dashboard/backend/auth/admin_meta_handlers.go
+index bf7093ed3..4d50d6f26 100644
+--- a/dashboard/backend/auth/admin_meta_handlers.go
++++ b/dashboard/backend/auth/admin_meta_handlers.go
+@@ -4,7 +4,6 @@ import (
+ 	"database/sql"
+ 	"encoding/json"
+ 	"errors"
+-	"log"
+ 	"net/http"
+ )
+ 
+@@ -22,7 +21,7 @@ func adminPermissionsHandler(svc *Service) http.HandlerFunc {
+ 
+ 		perms, err := svc.store.ListRolePermissions(r.Context())
+ 		if err != nil {
+-			log.Printf("failed to list permissions: %v", err)
++
+ 			http.Error(w, "failed to list permissions", http.StatusInternalServerError)
+ 			return
+ 		}
+@@ -59,7 +58,7 @@ func adminAuditLogsHandler(svc *Service) http.HandlerFunc {
+ 				http.Error(w, err.Error(), http.StatusBadRequest)
+ 				return
+ 			}
+-			log.Printf("failed to query audit logs: %v", err)
++
+ 			http.Error(w, "failed to query audit logs", http.StatusInternalServerError)
+ 			return
+ 		}
+@@ -106,7 +105,7 @@ func adminUserPasswordHandler(svc *Service) http.HandlerFunc {
+ 			if errors.Is(err, sql.ErrNoRows) {
+ 				http.Error(w, "user not found", http.StatusNotFound)
+ 			} else {
+-				log.Printf("failed to load user for password update: %v", err)
++
+ 				http.Error(w, "failed to load user", http.StatusInternalServerError)
+ 			}
+ 			return
+@@ -124,7 +123,7 @@ func adminUserPasswordHandler(svc *Service) http.HandlerFunc {
+ 			if writeAdminMutationAuthorizationError(w, err) {
+ 				return
+ 			}
+-			log.Printf("failed to update password: %v", err)
++
+ 			http.Error(w, "failed to update password", http.StatusInternalServerError)
+ 			return
+ 		}
+diff --git a/dashboard/backend/auth/admin_user_handlers.go b/dashboard/backend/auth/admin_user_handlers.go
+index 926d75b0d..ee4177b7f 100644
+--- a/dashboard/backend/auth/admin_user_handlers.go
++++ b/dashboard/backend/auth/admin_user_handlers.go
+@@ -5,7 +5,6 @@ import (
+ 	"database/sql"
+ 	"encoding/json"
+ 	"errors"
+-	"log"
+ 	"net/http"
+ 	"strconv"
+ 	"strings"
+@@ -49,19 +48,19 @@ func handleAdminUsersList(w http.ResponseWriter, r *http.Request, svc *Service)
+ 	}
+ 	users, err := svc.store.ListUsers(r.Context(), options)
+ 	if err != nil {
+-		log.Printf("failed to list users: %v", err)
++
+ 		http.Error(w, "failed to list users", http.StatusInternalServerError)
+ 		return
+ 	}
+ 	total, err := svc.store.CountFilteredUsers(r.Context(), options)
+ 	if err != nil {
+-		log.Printf("failed to count users: %v", err)
++
+ 		http.Error(w, "failed to list users", http.StatusInternalServerError)
+ 		return
+ 	}
+ 	stats, err := svc.store.UserDirectoryStats(r.Context())
+ 	if err != nil {
+-		log.Printf("failed to load user directory stats: %v", err)
++
+ 		http.Error(w, "failed to list users", http.StatusInternalServerError)
+ 		return
+ 	}
+@@ -174,7 +173,7 @@ func handleAdminUserPatch(
+ 		if errors.Is(validationErr, errLastActiveUserManager) {
+ 			http.Error(w, errLastActiveUserManager.Error(), http.StatusConflict)
+ 		} else {
+-			log.Printf("failed to validate user update: %v", validationErr)
++
+ 			http.Error(w, "failed to update user", http.StatusInternalServerError)
+ 		}
+ 		return
+@@ -188,7 +187,7 @@ func handleAdminUserPatch(
+ 		if writeAdminMutationAuthorizationError(w, err) {
+ 			return
+ 		}
+-		log.Printf("failed to update user: %v", err)
++
+ 		http.Error(w, "failed to update user", http.StatusInternalServerError)
+ 		return
+ 	}
+@@ -229,7 +228,7 @@ func handleAdminUserDelete(
+ 		if errors.Is(err, errLastActiveUserManager) {
+ 			http.Error(w, errLastActiveUserManager.Error(), http.StatusConflict)
+ 		} else {
+-			log.Printf("failed to validate user deletion: %v", err)
++
+ 			http.Error(w, "failed to delete user", http.StatusInternalServerError)
+ 		}
+ 		return
+@@ -242,7 +241,7 @@ func handleAdminUserDelete(
+ 		if writeAdminMutationAuthorizationError(w, err) {
+ 			return
+ 		}
+-		log.Printf("failed to delete user: %v", err)
++
+ 		http.Error(w, "failed to delete user", http.StatusInternalServerError)
+ 		return
+ 	}
+@@ -319,6 +318,6 @@ func writeUserLookupError(w http.ResponseWriter, err error) {
+ 		http.Error(w, "user not found", http.StatusNotFound)
+ 		return
+ 	}
+-	log.Printf("failed to load user: %v", err)
++
+ 	http.Error(w, "failed to load user", http.StatusInternalServerError)
+ }
+diff --git a/dashboard/backend/auth/invitation_handlers.go b/dashboard/backend/auth/invitation_handlers.go
+index fe2ec3010..de6c68566 100644
+--- a/dashboard/backend/auth/invitation_handlers.go
++++ b/dashboard/backend/auth/invitation_handlers.go
+@@ -3,7 +3,6 @@ package auth
+ import (
+ 	"encoding/json"
+ 	"errors"
+-	"log"
+ 	"net/http"
+ 	"strings"
+ )
+@@ -34,7 +33,7 @@ func adminInvitationsHandler(svc *Service) http.HandlerFunc {
+ 		case http.MethodGet:
+ 			items, err := svc.store.ListInvitations(r.Context())
+ 			if err != nil {
+-				log.Printf("failed to list invitations: %v", err)
++
+ 				http.Error(w, "failed to list invitations", http.StatusInternalServerError)
+ 				return
+ 			}
+@@ -64,7 +63,7 @@ func adminInvitationsHandler(svc *Service) http.HandlerFunc {
+ 				if writeInvitationValidationError(w, err) {
+ 					return
+ 				}
+-				log.Printf("failed to create invitation: %v", err)
++
+ 				http.Error(w, "failed to create invitation", http.StatusInternalServerError)
+ 				return
+ 			}
+@@ -161,7 +160,7 @@ func publicInvitationHandler(svc *Service) http.HandlerFunc {
+ 			}
+ 			perms, err := svc.store.GetEffectivePermissions(r.Context(), user.Role, user.ID)
+ 			if err != nil {
+-				log.Printf("failed to load invitation session permissions: %v", err)
++
+ 				http.Error(w, "failed to open session", http.StatusInternalServerError)
+ 				return
+ 			}
+@@ -184,7 +183,7 @@ func writeInvitationError(w http.ResponseWriter, err error) {
+ 	if writeInvitationValidationError(w, err) {
+ 		return
+ 	}
+-	log.Printf("failed to process invitation: %v", err)
++
+ 	http.Error(w, "failed to process invitation", http.StatusInternalServerError)
+ }
+ 
+diff --git a/dashboard/backend/auth/public_handlers.go b/dashboard/backend/auth/public_handlers.go
+index 9bf1e12e1..8f41c0e76 100644
+--- a/dashboard/backend/auth/public_handlers.go
++++ b/dashboard/backend/auth/public_handlers.go
+@@ -3,7 +3,6 @@ package auth
+ import (
+ 	"encoding/json"
+ 	"errors"
+-	"log"
+ 	"net/http"
+ 	"strings"
+ )
+@@ -25,7 +24,7 @@ func bootstrapCanRegisterHandler(svc *Service) http.HandlerFunc {
+ 
+ 		canRegister, err := svc.CanBootstrap(r.Context())
+ 		if err != nil {
+-			log.Printf("failed to check bootstrap status: %v", err)
++
+ 			http.Error(w, "failed to check bootstrap status", http.StatusInternalServerError)
+ 			return
+ 		}
+@@ -70,7 +69,7 @@ func bootstrapRegisterHandler(svc *Service) http.HandlerFunc {
+ 		// correctness gate for concurrent requests.
+ 		canBootstrap, err := svc.CanBootstrap(r.Context())
+ 		if err != nil {
+-			log.Printf("failed to check bootstrap status: %v", err)
++
+ 			http.Error(w, "failed to check bootstrap status", http.StatusInternalServerError)
+ 			return
+ 		}
+@@ -93,21 +92,21 @@ func bootstrapRegisterHandler(svc *Service) http.HandlerFunc {
+ 			return
+ 		}
+ 		if err != nil {
+-			log.Printf("failed to register bootstrap admin: %v", err)
++
+ 			http.Error(w, "failed to register admin", http.StatusInternalServerError)
+ 			return
+ 		}
+ 
+ 		token, err := svc.issueTokenForContext(r.Context(), user)
+ 		if err != nil {
+-			log.Printf("failed to create bootstrap session: %v", err)
++
+ 			http.Error(w, "failed to create session", http.StatusInternalServerError)
+ 			return
+ 		}
+ 
+ 		perms, err := svc.store.GetEffectivePermissions(r.Context(), user.Role, user.ID)
+ 		if err != nil {
+-			log.Printf("failed to load bootstrap permissions: %v", err)
++
+ 			http.Error(w, "failed to create session", http.StatusInternalServerError)
+ 			return
+ 		}
+@@ -139,7 +138,7 @@ func loginHandler(svc *Service) http.HandlerFunc {
+ 			case errors.Is(err, ErrUserNotActive):
+ 				http.Error(w, ErrUserNotActive.Error(), http.StatusUnauthorized)
+ 			default:
+-				log.Printf("authentication failed: %v", err)
++
+ 				http.Error(w, "authentication failed", http.StatusUnauthorized)
+ 			}
+ 			return
+@@ -147,7 +146,7 @@ func loginHandler(svc *Service) http.HandlerFunc {
+ 
+ 		perms, err := svc.store.GetEffectivePermissions(r.Context(), user.Role, user.ID)
+ 		if err != nil {
+-			log.Printf("failed to load login permissions: %v", err)
++
+ 			http.Error(w, "failed to create session", http.StatusInternalServerError)
+ 			return
+ 		}
+diff --git a/dashboard/backend/handlers/config_projection.go b/dashboard/backend/handlers/config_projection.go
+index d49923e5a..29df31182 100644
+--- a/dashboard/backend/handlers/config_projection.go
++++ b/dashboard/backend/handlers/config_projection.go
+@@ -2,7 +2,6 @@ package handlers
+ 
+ import (
+ 	"encoding/json"
+-	"log"
+ 	"net/http"
+ 	"strings"
+ )
+@@ -22,14 +21,14 @@ func ConfigDeploymentsHandler() http.HandlerFunc {
+ 
+ 		deployments, err := configProjectionStore.ListDeployments()
+ 		if err != nil {
+-			log.Printf("failed to list deployments: %v", err)
++
+ 			http.Error(w, "failed to list deployments", http.StatusInternalServerError)
+ 			return
+ 		}
+ 
+ 		w.Header().Set("Content-Type", "application/json")
+ 		if err := json.NewEncoder(w).Encode(deployments); err != nil {
+-			log.Printf("Error encoding config deployments: %v", err)
++
+ 		}
+ 	}
+ }
+@@ -55,7 +54,7 @@ func ConfigDeploymentDetailHandler() http.HandlerFunc {
+ 
+ 		deployment, err := configProjectionStore.GetDeployment(version)
+ 		if err != nil {
+-			log.Printf("failed to load deployment: %v", err)
++
+ 			if strings.Contains(err.Error(), "not found") {
+ 				http.Error(w, "deployment not found", http.StatusNotFound)
+ 				return
+@@ -66,7 +65,7 @@ func ConfigDeploymentDetailHandler() http.HandlerFunc {
+ 
+ 		w.Header().Set("Content-Type", "application/json")
+ 		if err := json.NewEncoder(w).Encode(deployment); err != nil {
+-			log.Printf("Error encoding config deployment detail: %v", err)
++
+ 		}
+ 	}
+ }
+@@ -86,14 +85,14 @@ func ActiveConfigProjectionHandler() http.HandlerFunc {
+ 
+ 		projection, err := configProjectionStore.GetActiveProjection()
+ 		if err != nil {
+-			log.Printf("failed to load active projection: %v", err)
++
+ 			http.Error(w, "failed to load active projection", http.StatusInternalServerError)
+ 			return
+ 		}
+ 
+ 		w.Header().Set("Content-Type", "application/json")
+ 		if err := json.NewEncoder(w).Encode(projection); err != nil {
+-			log.Printf("Error encoding active config projection: %v", err)
++
+ 		}
+ 	}
+ }

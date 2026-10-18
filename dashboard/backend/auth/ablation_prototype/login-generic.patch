@@ -1,0 +1,22 @@
+diff --git a/dashboard/backend/auth/public_handlers.go b/dashboard/backend/auth/public_handlers.go
+index 9bf1e12e1..b33e3cdb7 100644
+--- a/dashboard/backend/auth/public_handlers.go
++++ b/dashboard/backend/auth/public_handlers.go
+@@ -133,15 +133,8 @@ func loginHandler(svc *Service) http.HandlerFunc {
+ 
+ 		token, user, err := svc.Login(r.Context(), strings.TrimSpace(req.Email), req.Password)
+ 		if err != nil {
+-			switch {
+-			case errors.Is(err, ErrInvalidCredentials):
+-				http.Error(w, ErrInvalidCredentials.Error(), http.StatusUnauthorized)
+-			case errors.Is(err, ErrUserNotActive):
+-				http.Error(w, ErrUserNotActive.Error(), http.StatusUnauthorized)
+-			default:
+-				log.Printf("authentication failed: %v", err)
+-				http.Error(w, "authentication failed", http.StatusUnauthorized)
+-			}
++			log.Printf("authentication failed: %v", err)
++			http.Error(w, "authentication failed", http.StatusUnauthorized)
+ 			return
+ 		}
+ 

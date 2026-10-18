@@ -1,0 +1,10 @@
+{
+  "variant": "login-text-classification",
+  "exit_code": 1,
+  "production_line_delta": 0,
+  "failed_cases": [
+    "TestLoginHandlerHidesStoreErrorsMatchingBusinessMessages/invalid_credentials",
+    "TestLoginHandlerHidesStoreErrorsMatchingBusinessMessages/user_is_not_active"
+  ],
+  "passed_cases": 93
+}

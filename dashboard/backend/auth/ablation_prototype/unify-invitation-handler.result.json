@@ -1,0 +1,7 @@
+{
+  "variant": "unify-invitation-handler",
+  "exit_code": 0,
+  "production_line_delta": -14,
+  "failed_cases": [],
+  "passed_cases": 96
+}

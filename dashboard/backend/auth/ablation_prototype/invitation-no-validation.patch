@@ -1,0 +1,19 @@
+diff --git a/dashboard/backend/auth/invitation_handlers.go b/dashboard/backend/auth/invitation_handlers.go
+index fe2ec3010..17d29f33d 100644
+--- a/dashboard/backend/auth/invitation_handlers.go
++++ b/dashboard/backend/auth/invitation_handlers.go
+@@ -189,14 +189,5 @@ func writeInvitationError(w http.ResponseWriter, err error) {
+ }
+ 
+ func writeInvitationValidationError(w http.ResponseWriter, err error) bool {
+-	for _, validationErr := range []error{
+-		ErrInvalidInvitationEmail, ErrInvalidInvitationName, ErrInvitationUserExists,
+-		ErrInvalidInvitationKind, ErrInvalidInvitationUses, errInvalidRole,
+-	} {
+-		if errors.Is(err, validationErr) {
+-			http.Error(w, validationErr.Error(), http.StatusBadRequest)
+-			return true
+-		}
+-	}
+ 	return false
+ }

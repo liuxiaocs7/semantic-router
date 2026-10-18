@@ -1,0 +1,11 @@
+{
+  "variant": "login-generic",
+  "exit_code": 1,
+  "production_line_delta": -7,
+  "failed_cases": [
+    "TestLoginHandlerKeepsUserVisibleErrors/missing_user",
+    "TestLoginHandlerKeepsUserVisibleErrors/wrong_password",
+    "TestLoginHandlerKeepsUserVisibleErrors/inactive_user"
+  ],
+  "passed_cases": 92
+}

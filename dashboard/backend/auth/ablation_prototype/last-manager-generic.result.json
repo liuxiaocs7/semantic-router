@@ -1,0 +1,11 @@
+{
+  "variant": "last-manager-generic",
+  "exit_code": 1,
+  "production_line_delta": -8,
+  "failed_cases": [
+    "TestAdminUserMutationsKeepLastManagerConflict/PATCH{\"role\":\"read\"}",
+    "TestAdminUserMutationsKeepLastManagerConflict/PATCH{\"status\":\"inactive\"}",
+    "TestAdminUserMutationsKeepLastManagerConflict/DELETE"
+  ],
+  "passed_cases": 92
+}

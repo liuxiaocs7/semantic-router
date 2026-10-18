@@ -1,0 +1,32 @@
+[
+  {
+    "name": "baseline",
+    "packages": [
+      {
+        "Package": "github.com/vllm-project/semantic-router/dashboard/backend/auth",
+        "Action": "pass",
+        "Elapsed": 25.477
+      },
+      {
+        "Package": "github.com/vllm-project/semantic-router/dashboard/backend/handlers",
+        "Action": "pass",
+        "Elapsed": 45.127
+      }
+    ]
+  },
+  {
+    "name": "final-race",
+    "packages": [
+      {
+        "Package": "github.com/vllm-project/semantic-router/dashboard/backend/handlers",
+        "Action": "pass",
+        "Elapsed": 118.262
+      },
+      {
+        "Package": "github.com/vllm-project/semantic-router/dashboard/backend/auth",
+        "Action": "pass",
+        "Elapsed": 232.595
+      }
+    ]
+  }
+]

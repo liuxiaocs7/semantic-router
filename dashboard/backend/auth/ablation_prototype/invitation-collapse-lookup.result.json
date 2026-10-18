@@ -1,0 +1,12 @@
+{
+  "variant": "invitation-collapse-lookup",
+  "exit_code": 1,
+  "production_line_delta": -7,
+  "failed_cases": [
+    "TestPublicInvitationRoutesReportStoreFailures/closed_database/GET",
+    "TestPublicInvitationRoutesReportStoreFailures/closed_database/POST",
+    "TestPublicInvitationRoutesReportStoreFailures/missing_invitations_table/GET",
+    "TestPublicInvitationRoutesReportStoreFailures/missing_invitations_table/POST"
+  ],
+  "passed_cases": 89
+}
