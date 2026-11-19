@@ -935,11 +935,8 @@ decisions:
     messages:
     - role: user
       content: ' '
-    expected_signal_errors:
-      systemone:task: systemone_rejected
-      systemone:verification: systemone_rejected
-      systemone:correction: systemone_rejected
-      systemone:clarify: systemone_rejected
+    expected_signal_errors: {}
+    notes: Empty user text skips the System One questions and reaches the fallback without a signal error.
     tags:
     - fallback
     - negative
