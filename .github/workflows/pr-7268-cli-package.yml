@@ -1,0 +1,70 @@
+name: PR 7268 CLI Package diagnostic
+on:
+  push:
+    branches: [diagnostics/pr-7268-cli-package]
+permissions:
+  contents: read
+jobs:
+  package:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      BASE_REF: 77d630e10d0567fb87e8accbee6fca7b43b79232
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: vllm-project/semantic-router
+          ref: dfdc518226dd3d9e9aa38b88b2f9011ab19425ba
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Verify candidate and base
+        run: |
+          git log -1 --format='%H%n%T%n%P'
+          test "$(git rev-parse HEAD^{tree})" = 45b25bd53dac0f3b34617e8bd2a67255285d2b09
+          test "$(git rev-parse HEAD^1)" = "$BASE_REF"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install packaging tools
+        run: python -m pip install build==1.6.1 twine==7.0.0 PyYAML==6.0.3 jsonschema==4.26.0
+      - name: Qualify the final candidate with stage timing
+        run: |
+          python -u - <<'PY'
+          from datetime import datetime, timezone
+          from pathlib import Path
+          import os
+          import runpy
+          import sys
+          import time
+
+          script = Path("tools/ci/package_contract.py").resolve()
+          sys.path.insert(0, str(script.parent))
+          sys.argv = [
+              str(script), "--mode", "pr", "--tag", "",
+              "--base-ref", os.environ["BASE_REF"], "--output", ".agent-harness/package",
+          ]
+          stages = {}
+
+          def trace_stage(frame, event, arg):
+              if frame.f_code.co_filename != str(script) or frame.f_code.co_name not in {"check", "run"}:
+                  return
+              if event == "call":
+                  label = frame.f_locals.get("name") or repr(frame.f_locals["command"])
+                  stages[frame] = (label, time.monotonic())
+                  print(f"{datetime.now(timezone.utc).isoformat()} START {label}")
+              elif event == "return" and frame in stages:
+                  label, started = stages.pop(frame)
+                  print(f"{datetime.now(timezone.utc).isoformat()} END {label} ({time.monotonic() - started:.2f}s)")
+
+          sys.setprofile(trace_stage)
+          try:
+              runpy.run_path(str(script), run_name="__main__")
+          finally:
+              sys.setprofile(None)
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: package-evidence
+          path: .agent-harness/package/evidence.json
+          include-hidden-files: true
