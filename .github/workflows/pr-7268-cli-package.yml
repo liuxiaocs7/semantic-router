@@ -9,6 +9,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     env:
+      PYTHONUNBUFFERED: '1'
       BASE_REF: 77d630e10d0567fb87e8accbee6fca7b43b79232
     steps:
       - uses: actions/checkout@v4
