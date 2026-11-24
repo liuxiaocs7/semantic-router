@@ -1,0 +1,20 @@
+name: Upload benchmark memory checkpoint
+description: Preserve progress before a potential runner disconnect.
+inputs:
+  seconds:
+    description: Benchmark elapsed seconds to wait for.
+    required: true
+runs:
+  using: composite
+  steps:
+    - name: Copy the latest evidence
+      shell: bash
+      env:
+        SECONDS_TARGET: ${{ inputs.seconds }}
+      run: python3 "$GITHUB_ACTION_PATH/probe.py" checkpoint "$SECONDS_TARGET"
+    - uses: actions/upload-artifact@v4
+      with:
+        name: ${{ env.MODE }}-${{ inputs.seconds }}s-attempt-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/benchmark-checkpoint
+        if-no-files-found: error
+        retention-days: 7

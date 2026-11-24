@@ -1,0 +1,91 @@
+name: "Diagnostics #7280: Production benchmark memory"
+on:
+  push:
+    branches: [diagnostics/7280-production-benchmarks]
+
+permissions:
+  contents: read
+
+jobs:
+  benchmark:
+    if: github.repository == 'liuxiaocs7/semantic-router'
+    name: ${{ matrix.mode }} / 2e4171d4
+    runs-on: ubuntu-24.04
+    timeout-minutes: 65
+    strategy:
+      fail-fast: false
+      matrix:
+        mode: [combined, split]
+    env:
+      BASE_SHA: 2e4171d4dd3d72d61188bb7ec529211fbc3263ad
+      MODE: ${{ matrix.mode }}
+      HF_HUB_DISABLE_XET: "1"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.25"
+          cache: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Configure the experiment
+        run: |
+          echo "VLLM_SRUN_CACHE_DIR=$RUNNER_TEMP/model-cache" >> "$GITHUB_ENV"
+          echo "REPORTS=$RUNNER_TEMP/benchmark-evidence" >> "$GITHUB_ENV"
+          git rev-parse --verify "${BASE_SHA}^{commit}"
+          test "$(git rev-parse HEAD^)" = 14e67c09898f91a4997d600c4bb2bd3d8f2185a3
+      - name: Install the pinned model runtime toolchain
+        run: make harness-venv-install model-runtime-install
+      - name: Start the baseline with resource sampling
+        run: |
+          mkdir -p "$REPORTS"
+          {
+            echo "mode=$MODE"
+            echo "base=$BASE_SHA"
+            git rev-parse HEAD^
+            nproc
+            go version
+            python3 --version
+            lscpu
+            free -k
+          } | tee "$REPORTS/runner.txt"
+          script=.github/actions/benchmark-memory-checkpoint/probe.py
+          nohup python3 -u "$script" run > "$REPORTS/supervisor.log" 2>&1 < /dev/null &
+      - uses: ./.github/actions/benchmark-memory-checkpoint
+        with:
+          seconds: "30"
+      - uses: ./.github/actions/benchmark-memory-checkpoint
+        with:
+          seconds: "90"
+      - uses: ./.github/actions/benchmark-memory-checkpoint
+        with:
+          seconds: "150"
+      - uses: ./.github/actions/benchmark-memory-checkpoint
+        with:
+          seconds: "200"
+      - uses: ./.github/actions/benchmark-memory-checkpoint
+        with:
+          seconds: "250"
+      - uses: ./.github/actions/benchmark-memory-checkpoint
+        with:
+          seconds: "310"
+      - uses: ./.github/actions/benchmark-memory-checkpoint
+        with:
+          seconds: "430"
+      - uses: ./.github/actions/benchmark-memory-checkpoint
+        with:
+          seconds: "600"
+      - name: Verify the baseline result and all required benchmark names
+        run: python3 .github/actions/benchmark-memory-checkpoint/probe.py verify
+      - name: Upload complete benchmark evidence
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.mode }}-final-attempt-${{ github.run_attempt }}
+          path: ${{ env.REPORTS }}
+          if-no-files-found: error
+          retention-days: 14
